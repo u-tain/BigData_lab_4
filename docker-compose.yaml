@@ -1,0 +1,39 @@
+version: '3.10'
+
+services:
+  database:
+    container_name: database
+    image:  bitnami/clickhouse:latest
+    ports:
+      - "8123:8123"
+    networks:
+      customnetwork:
+        ipv4_address: ${ip_db}
+    ulimits:
+      nofile: 262144
+    environment:
+      CLICKHOUSE_DB: ${name_db}
+      CLICKHOUSE_USER: ${user} 
+      CLICKHOUSE_PASSWORD: ${pass}
+      DEFAULT_SESSION_TIMEOUT: 120
+    volumes:
+      - ./database/config.xml:/etc/config.xml
+
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    networks:
+      - customnetwork
+    volumes:
+      - .:/app
+    depends_on:
+      - database
+
+networks:
+  customnetwork:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${ip_net}

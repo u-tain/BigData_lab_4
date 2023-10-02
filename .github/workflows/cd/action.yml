@@ -1,0 +1,8 @@
+name: cd step
+runs:
+  using: "composite"
+  steps:
+  - name: Run docker
+    shell: bash
+    run: docker-compose up --build
+    
