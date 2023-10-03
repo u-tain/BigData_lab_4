@@ -6,6 +6,7 @@ import configparser
 import logging
 from bd_utils import connect2bd
 from kafka import KafkaProducer
+import yaml
 
 
 class Predictor():
@@ -56,8 +57,10 @@ class Predictor():
         with open('src/config.ini', 'w') as configfile:
             self.config.write(configfile)
         results.to_csv(self.result_path, index=False)
-            
-        producer = KafkaProducer(bootstrap_servers=f"172.25.0.4:9092", api_version=(0, 10, 2))
+        
+        with open(os.path.join(os.getcwd(),'secrets','secrets.yml'), 'r') as file:
+            yml = yaml.safe_load(file)
+        producer = KafkaProducer(bootstrap_servers=f"{yml['kafka_host']}:{yml['kafka_port']}", api_version=(0, 10, 2))
         for index, row in results.iterrows():
             row = row.to_json().encode('utf-8')
             index = str(index).encode('utf-8')
