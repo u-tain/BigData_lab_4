@@ -75,6 +75,7 @@ services:
     networks:
       customnetwork:
         ipv4_address: ${app_ip}
+
     volumes:
       - .:/app
     depends_on:
