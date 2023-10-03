@@ -5,6 +5,8 @@ import os
 import configparser
 import logging
 from bd_utils import connect2bd
+from kafka import KafkaProducer
+
 
 class Predictor():
     def __init__(self) -> None:
@@ -54,6 +56,13 @@ class Predictor():
         with open('src/config.ini', 'w') as configfile:
             self.config.write(configfile)
         results.to_csv(self.result_path, index=False)
+            
+        producer = KafkaProducer(bootstrap_servers=f"172.25.0.4:9092", api_version=(0, 10, 2))
+        for index, row in results.iterrows():
+            row = row.to_json().encode('utf-8')
+            index = str(index).encode('utf-8')
+            producer.send("kafka-pred", key=index, value=row)
+        producer.close()
         logging.info('results written to file ' + self.result_path)
         return True
 
