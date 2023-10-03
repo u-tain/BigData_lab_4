@@ -12,6 +12,12 @@ jobs:
        name_db: ${{ secrets.DB_NAME }}
        ip_db: ${{ secrets.DB_IP }}
        ip_net: ${{ secrets.NET_IP }}
+       ip_kafka:  ${{ secrets.KAFKA_IP }}
+       port_kafka:  ${{ secrets.KAFKA_PORT }}
+       app_ip: ${{ secrets.APP_IP }}
+       topics_ip: ${{ secrets.TOP_IP }}
+       consumer_ip: ${{ secrets.CON_IP }}
+       zookeeper_ip: ${{ secrets.ZOO_IP }}
     steps:
       -
         name: Checkout
@@ -40,6 +46,10 @@ jobs:
         name: Start docker
         shell: bash
         run: docker-compose up -d 
+      -
+        name: stop app
+        shell: bash
+        run: docker-compose stop app 
       -
         name: Run docker
         shell: bash
