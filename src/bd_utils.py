@@ -7,10 +7,10 @@ import yaml
 def connect2bd():
     with open(os.path.join(os.getcwd(),'secrets','secrets.yml'), 'r') as file:
         yml = yaml.safe_load(file)
-    yml = [item.split(' ') for item in yml.split('=')]
-    return clickhouse_connect.get_client(host=yml[3][1],
-                                         username=yml[2][1], 
-                                         password=yml[1][1])
+    # yml = [item.split(' ') for item in yml.split('=')]
+    return clickhouse_connect.get_client(host=yml['my_host'],
+                                         username=yml['user'], 
+                                         password=yml['pass'])
 
 
 def check_clear_db(client):

@@ -6,7 +6,7 @@ services:
        container_name: zookeeper
        networks:
         customnetwork:
-          ipv4_address: 172.25.0.3
+          ipv4_address: ${zookeeper_ip}
        environment:
            ZOOKEEPER_CLIENT_PORT: 2181        
   kafka:
@@ -14,9 +14,9 @@ services:
        container_name: kafka
        networks:
         customnetwork:
-          ipv4_address: 172.25.0.4
+          ipv4_address: ${kafka_ip}
        ports:
-           - "9092:9092"
+           - "${port_kafka}:${port_kafka}"
        depends_on:
            - zookeeper
        environment:
@@ -24,8 +24,8 @@ services:
            KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
            KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-           KAFKA_LISTENERS: INTERNAL://:9092
-           KAFKA_ADVERTISED_LISTENERS: INTERNAL://172.25.0.4:9092
+           KAFKA_LISTENERS: INTERNAL://:${port_kafka}
+           KAFKA_ADVERTISED_LISTENERS: INTERNAL://${kafka_ip}:${port_kafka}
            KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
           
   kafka-topics-generator:
@@ -33,22 +33,22 @@ services:
        container_name: kafka-topics-generator
        networks:
         customnetwork:
-          ipv4_address: 172.25.0.5
+          ipv4_address: ${topics_ip}
        depends_on:
            - kafka
        command: >
            bash -c
              "sleep 5s &&
-             kafka-topics --create --topic=kafka-predictions --if-not-exists --bootstrap-server=172.25.0.4:9092"
+             kafka-topics --create --topic=kafka-predictions --if-not-exists --bootstrap-server=${kafka_ip}:${port_kafka}"
   kafka-consumer:
        image: confluentinc/cp-kafka:7.3.2
        networks:
         customnetwork:
-          ipv4_address: 172.25.0.6
+          ipv4_address: ${consumer_ip}
        container_name: kafka-consumer
        command: >
            bash -c
-             "kafka-console-consumer --bootstrap-server 172.25.0.4:9092 --topic kafka-pred --from-beginning"
+             "kafka-console-consumer --bootstrap-server ${kafka_ip}:${port_kafka} --topic kafka-pred --from-beginning"
   database:
     container_name: database
     image:  bitnami/clickhouse:latest
@@ -56,13 +56,13 @@ services:
       - "8123:8123"
     networks:
       customnetwork:
-        ipv4_address: 172.25.0.2
+        ipv4_address: ${ip_db}
     ulimits:
       nofile: 262144
     environment:
-      CLICKHOUSE_DB: default
-      CLICKHOUSE_USER:  utain 
-      CLICKHOUSE_PASSWORD: 3244
+      CLICKHOUSE_DB: ${name_db}
+      CLICKHOUSE_USER: ${user} 
+      CLICKHOUSE_PASSWORD: ${pass}
       DEFAULT_SESSION_TIMEOUT: 120
     volumes:
       - ./database/config.xml:/etc/config.xml
@@ -74,7 +74,8 @@ services:
       dockerfile: ./Dockerfile
     networks:
       customnetwork:
-        ipv4_address: 172.25.0.8
+        ipv4_address: ${app_ip}
+
     volumes:
       - .:/app
     depends_on:
@@ -85,4 +86,4 @@ networks:
     driver: bridge
     ipam:
       config:
-        - subnet: 172.25.0.0/16
+        - subnet: ${ip_net}
