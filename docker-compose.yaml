@@ -73,7 +73,8 @@ services:
       context: .
       dockerfile: ./Dockerfile
     networks:
-      - customnetwork
+      customnetwork:
+        ipv4_address: 172.25.0.8
     volumes:
       - .:/app
     depends_on:
