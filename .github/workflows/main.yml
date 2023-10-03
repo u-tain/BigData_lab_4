@@ -41,6 +41,10 @@ jobs:
         shell: bash
         run: docker-compose up -d 
       -
+        name: stop app
+        shell: bash
+        run: docker-compose stop app 
+      -
         name: Run docker
         shell: bash
         run: docker-compose run app 
