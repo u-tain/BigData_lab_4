@@ -1,11 +1,11 @@
 # Отчет
-Ссылка на github репозиторий: https://github.com/u-tain/BigData_lab_3
+Ссылка на github репозиторий: https://github.com/u-tain/BigData_lab_4
 
 
 1. Сделан форк репозитория на GitHub
-2. С помощью cygwin64 был установлен ansible на windows
-3. С помощью ansible-vault были закодированы необходимые секреты
-4. Написан ansible-playbook, результатом которого является файл с раскодированными секретами. Этот файл удаляется по завершению работы сервиса app
+2. в docker-compose.yml добавлены контейнеры zookeeper, kafka, kafka-consumer, kafka-topics-generator, настроена их работа
+3. в predict.py добалена отправка результата модели с помощью kafka-producer
+4. Произведена интеграция Kafka сервиса с сервисом хранилища секретов.
 5. Исправлен  CI/CD пайплайн:
 ```
 name: ci
@@ -22,6 +22,12 @@ jobs:
        name_db: ${{ secrets.DB_NAME }}
        ip_db: ${{ secrets.DB_IP }}
        ip_net: ${{ secrets.NET_IP }}
+       ip_kafka:  ${{ secrets.KAFKA_IP }}
+       port_kafka:  ${{ secrets.KAFKA_PORT }}
+       app_ip: ${{ secrets.APP_IP }}
+       topics_ip: ${{ secrets.TOP_IP }}
+       consumer_ip: ${{ secrets.CON_IP }}
+       zookeeper_ip: ${{ secrets.ZOO_IP }}
     steps:
       -
         name: Checkout
@@ -51,6 +57,10 @@ jobs:
         shell: bash
         run: docker-compose up -d 
       -
+        name: stop app
+        shell: bash
+        run: docker-compose stop app 
+      -
         name: Run docker
         shell: bash
         run: docker-compose run app 
@@ -59,6 +69,6 @@ jobs:
         shell: bash
         run: docker-compose down
 ```
-Результат:
+результат:
+![image](https://github.com/u-tain/BigData_lab_4/assets/43996253/abdf91c5-5fb9-4f56-af0a-aa8c93058b0e)
 
-![image](https://github.com/u-tain/BigData_lab_3/assets/43996253/95d1e229-50e9-4181-9c2e-02a14194e180)
